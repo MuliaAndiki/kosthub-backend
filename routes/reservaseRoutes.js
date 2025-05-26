@@ -2,7 +2,12 @@ const express = require("express");
 const router = express.Router();
 const reservaseConroller = require("../controllers/reservaseController");
 const { verifyToken } = require("../middleware/auth");
-const upload = require("../middleware/upload");
+const multer = require("multer");
+const { uploadToCloudinary } = require("../utils/cloudinary");
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
+const uploadMemory = upload.single("imageUlasan");
 
 router.post(
   "/:id_user/:id_kos",
@@ -25,7 +30,7 @@ router.delete(
 router.post(
   "/review/:id_user/:id_reservase",
   verifyToken,
-  upload.single("imageUlasan"),
+  uploadMemory,
   reservaseConroller.addReview
 );
 module.exports = router;

@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const reservaseConroller = require("../controllers/reservaseController");
-const { verifyToken } = require("../middleware/auth");
-const multer = require("multer");
-const { uploadToCloudinary } = require("../utils/cloudinary");
+import * as reservaseConroller from "../controllers/reservaseController.js";
+import { verifyToken } from "../middleware/auth.js";
+import multer from "multer";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -33,4 +33,4 @@ router.post(
   uploadMemory,
   reservaseConroller.addReview
 );
-module.exports = router;
+export default router;

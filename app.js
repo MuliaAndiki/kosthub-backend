@@ -1,11 +1,16 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-require("dotenv").config();
-const authRouter = require("./routes/authRoutes");
-const kosRoutes = require("./routes/kosRoutes");
-const reservaseRoutes = require("./routes/reservaseRoutes");
-const path = require("path");
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dotenv from "dotenv";
+import authRouter from "./routes/authRoutes.js";
+import kosRoutes from "./routes/kosRoutes.js";
+import reservaseRoutes from "./routes/reservaseRoutes.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+
+dotenv.config();
+
 const app = express();
 
 // Middleware
@@ -18,6 +23,9 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/kos", kosRoutes);
 app.use("/api/auth", authRouter);
 app.use("/api/reservase", reservaseRoutes);
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 app.use("/images", express.static(path.join(__dirname, "uploads/images")));
 

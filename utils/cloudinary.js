@@ -1,9 +1,9 @@
-const cloudinary = require("cloudinary").v2;
-const { Readable } = require("stream");
+import { v2 as cloudinary } from "cloudinary";
+import { Readable } from "stream";
 
 cloudinary.config(process.env.CLOUDINARY_URL);
 
-exports.uploadToCloudinary = (buffer, folder, alias = null) => {
+export const uploadToCloudinary = (buffer, folder, alias = null) => {
   return new Promise((resolve, reject) => {
     const options = { folder };
     if (alias) options.public_id = alias;

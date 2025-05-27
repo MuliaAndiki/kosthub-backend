@@ -1,33 +1,54 @@
-const Kos = require("../models/Kos");
-const User = require("../models/Auth");
-const Reservase = require("../models/Reservase");
-const path = require("path");
+import Kos from "../models/Kos.js";
+import User from "../models/Auth.js";
+import Reservase from "../models/Reservase.js";
+import path from "path";
 
 // GET all
-exports.getAllKos = async (req, res) => {
-  const data = await Kos.find();
-  res.json(data);
+export const getAllKos = async (req, res) => {
+  try {
+    const data = await Kos.find();
+    res.json(data);
+  } catch (error) {
+    console.error("Error fetching all kos:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch kos", error: error.message });
+  }
 };
 
 // GET by ID
-exports.getKosById = async (req, res) => {
-  const kos = await Kos.findOne({ id_kos: req.params.id });
-  kos ? res.json(kos) : res.status(404).json({ message: "Tidak ditemukan" });
+export const getKosById = async (req, res) => {
+  try {
+    const kos = await Kos.findOne({ id_kos: req.params.id });
+    kos ? res.json(kos) : res.status(404).json({ message: "Tidak ditemukan" });
+  } catch (error) {
+    console.error("Error fetching kos by ID:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to fetch kos", error: error.message });
+  }
 };
 
 // PUT
-exports.updateKos = async (req, res) => {
-  const updated = await Kos.findOneAndUpdate(
-    { id_kos: req.params.id },
-    req.body,
-    { new: true }
-  );
-  updated
-    ? res.json(updated)
-    : res.status(404).json({ message: "Tidak ditemukan" });
+export const updateKos = async (req, res) => {
+  try {
+    const updated = await Kos.findOneAndUpdate(
+      { id_kos: req.params.id },
+      req.body,
+      { new: true }
+    );
+    updated
+      ? res.json(updated)
+      : res.status(404).json({ message: "Tidak ditemukan" });
+  } catch (error) {
+    console.error("Error updating kos:", error);
+    res
+      .status(500)
+      .json({ message: "Failed to update kos", error: error.message });
+  }
 };
 
-exports.filterKos = async (req, res) => {
+export const filterKos = async (req, res) => {
   const { fasilitas, minHarga, maxHarga, rating, tipeHarga, harga } = req.query;
 
   try {

@@ -1,9 +1,10 @@
-const Reservase = require("../models/Reservase");
-const Auth = require("../models/Auth");
-const Kos = require("../models/Kos");
-const path = require("path");
+import Reservase from "../models/Reservase.js";
+import Auth from "../models/Auth.js";
+import Kos from "../models/Kos.js";
+import path from "path";
+import mongoose from "mongoose";
 
-exports.createReservase = async (req, res) => {
+export const createReservase = async (req, res) => {
   const { id_kos, id_user } = req.params;
 
   try {
@@ -66,7 +67,7 @@ exports.createReservase = async (req, res) => {
       });
     }
 
-    const realGender = gender === "Laki" ? true : false;
+    const realGender = gender === "Laki";
 
     const newReservase = new Reservase({
       nama,
@@ -101,7 +102,7 @@ exports.createReservase = async (req, res) => {
   }
 };
 
-exports.getReservaseByUserId = async (req, res) => {
+export const getReservaseByUserId = async (req, res) => {
   try {
     const { id_user } = req.params;
 
@@ -139,9 +140,7 @@ exports.getReservaseByUserId = async (req, res) => {
   }
 };
 
-const mongoose = require("mongoose");
-
-exports.deleteReservaseByUserAndReservaseId = async (req, res) => {
+export const deleteReservaseByUserAndReservaseId = async (req, res) => {
   try {
     const { id_user, id_reservase } = req.params;
 
@@ -181,7 +180,7 @@ exports.deleteReservaseByUserAndReservaseId = async (req, res) => {
   }
 };
 
-exports.addReview = async (req, res) => {
+export const addReview = async (req, res) => {
   const { id_user, id_reservase } = req.params;
   const { bintang, komentar } = req.body;
 

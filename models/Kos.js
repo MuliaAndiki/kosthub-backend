@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const KosSchema = new mongoose.Schema({
   id_kos: { type: Number, required: true, unique: true },
@@ -33,4 +33,4 @@ const KosSchema = new mongoose.Schema({
   ],
 });
 
-module.exports = mongoose.model("Kos", KosSchema);
+export default mongoose.model("Kos", KosSchema);

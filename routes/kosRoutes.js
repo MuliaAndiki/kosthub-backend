@@ -1,10 +1,10 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const kosController = require("../controllers/kosController");
+import * as kosController from "../controllers/kosController.js"; // Asumsi ekstensi .js
 
 router.get("/filter", kosController.filterKos);
 router.get("/", kosController.getAllKos);
 router.get("/:id", kosController.getKosById);
 router.put("/:id", kosController.updateKos);
 
-module.exports = router;
+export default router;

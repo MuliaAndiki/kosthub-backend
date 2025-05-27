@@ -1,11 +1,11 @@
-const Auth = require("../models/Auth");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const { verifyToken } = require("../middleware/auth");
-const Kos = require("../models/Kos");
-const Reservase = require("../models/Reservase");
+import Auth from "../models/Auth.js";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import { verifyToken } from "../middleware/auth.js";
+import Kos from "../models/Kos.js";
+import Reservase from "../models/Reservase.js";
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const {
       username,
@@ -18,7 +18,7 @@ exports.register = async (req, res) => {
       gender,
     } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    let realGernder = gender === "Laki" ? true : false;
+    const realGender = gender === "Laki";
 
     if (
       !username ||
@@ -46,7 +46,7 @@ exports.register = async (req, res) => {
       nomor,
       tanggal_lahir: tanggal_lahir || null,
       alamat: alamat || null,
-      gender: realGernder,
+      gender: realGender,
       token: null,
     });
 
@@ -59,7 +59,7 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await Auth.findOne({ username });
@@ -82,7 +82,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.changePassword = async (req, res) => {
+export const changePassword = async (req, res) => {
   verifyToken(req, res, async () => {
     try {
       const { oldPassword, newPassword } = req.body;
@@ -106,7 +106,7 @@ exports.changePassword = async (req, res) => {
   });
 };
 
-exports.updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   const { username, ...updates } = req.body;
 
   try {
@@ -139,7 +139,7 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
-exports.saveKos = async (req, res) => {
+export const saveKos = async (req, res) => {
   const { id_kos } = req.params;
 
   try {
@@ -154,7 +154,7 @@ exports.saveKos = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    if (user.savedKos && user.savedKos.includes(kos._id)) {
+    if (user.savedKos?.includes(kos._id)) {
       return res.status(400).json({ message: "Kos already saved" });
     }
 
@@ -171,7 +171,7 @@ exports.saveKos = async (req, res) => {
   }
 };
 
-exports.getUser = async (req, res) => {
+export const getUser = async (req, res) => {
   try {
     const user = await Auth.findById(req.user.id).populate("savedKos");
     if (!user) {

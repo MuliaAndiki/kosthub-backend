@@ -1,9 +1,9 @@
-const express = require("express");
+import express from "express";
 const authRouter = express.Router();
-const authController = require("../controllers/authController");
-const multer = require("multer");
-const { uploadToCloudinary } = require("../utils/cloudinary");
-const { verifyToken } = require("../middleware/auth");
+import * as authController from "../controllers/authController.js";
+import multer from "multer";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
+import { verifyToken } from "../middleware/auth.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -21,4 +21,4 @@ authRouter.put(
 authRouter.post("/save-kos/:id_kos", verifyToken, authController.saveKos);
 authRouter.get("/getSaveKost", verifyToken, authController.getUser);
 
-module.exports = authRouter;
+export default authRouter;

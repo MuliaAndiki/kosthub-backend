@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const Auth = new mongoose.Schema({
+const AuthSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -47,4 +47,4 @@ const Auth = new mongoose.Schema({
   ],
 });
 
-module.exports = mongoose.model("Auth", Auth);
+export default mongoose.model("Auth", AuthSchema);

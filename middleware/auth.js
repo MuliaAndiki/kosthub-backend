@@ -1,7 +1,7 @@
-const jwt = require("jsonwebtoken");
-const Auth = require("../models/Auth");
+import jwt from "jsonwebtoken";
+import Auth from "../models/Auth.js";
 
-exports.verifyToken = async (req, res, next) => {
+export const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {

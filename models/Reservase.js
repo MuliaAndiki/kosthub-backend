@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const Reservase = new mongoose.Schema(
+const ReservaseSchema = new mongoose.Schema(
   {
     nama: { type: String },
     tanggal_lahir: { type: String },
@@ -34,4 +34,4 @@ const Reservase = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Reservase", Reservase);
+export default mongoose.model("Reservase", ReservaseSchema);

@@ -215,8 +215,17 @@ export const addReview = async (req, res) => {
       });
     }
 
-    const imageUlasan = req.file?.filename;
-    if (!imageUlasan) {
+    const imageUlasanFile = req.file;
+    let imageUlasanUrl = null;
+    if (imageUlasanFile) {
+      try {
+        const { uploadToCloudinary } = await import("../utils/cloudinary.js");
+        const result = await uploadToCloudinary(imageUlasanFile.buffer, "ulasanKos");
+        imageUlasanUrl = result.secure_url;
+      } catch (err) {
+        return res.status(500).json({ success: false, message: "Gagal upload gambar ulasan", error: err.message });
+      }
+    } else {
       return res.status(400).json({
         success: false,
         message: "Gambar ulasan diperlukan.",
@@ -227,7 +236,7 @@ export const addReview = async (req, res) => {
       nama: user.fullname,
       bintang: parseInt(bintang),
       komentar,
-      imageUlasan,
+      imageUlasan: imageUlasanUrl,
       tanggal: new Date(),
     };
 

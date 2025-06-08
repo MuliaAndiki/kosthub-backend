@@ -33,3 +33,10 @@ export const verifyToken = async (req, res, next) => {
     });
   }
 };
+
+export const requireRole = (roles) => (req, res, next) => {
+  if (!req.user || !roles.includes(req.user.role)) {
+    return res.status(403).json({ message: "Akses ditolak. Role tidak sesuai." });
+  }
+  next();
+};

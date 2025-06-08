@@ -2,11 +2,12 @@ import Kos from "../models/Kos.js";
 import User from "../models/Auth.js";
 import Reservase from "../models/Reservase.js";
 import path from "path";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
-// GET all
+// GET all hanya kos approved
 export const getAllKos = async (req, res) => {
   try {
-    const data = await Kos.find();
+    const data = await Kos.find({ status: "approved" });
     res.json(data);
   } catch (error) {
     console.error("Error fetching all kos:", error);
@@ -16,10 +17,10 @@ export const getAllKos = async (req, res) => {
   }
 };
 
-// GET by ID
+// GET by ID hanya kos approved
 export const getKosById = async (req, res) => {
   try {
-    const kos = await Kos.findOne({ id_kos: req.params.id });
+    const kos = await Kos.findOne({ id_kos: req.params.id, status: "approved" });
     kos ? res.json(kos) : res.status(404).json({ message: "Tidak ditemukan" });
   } catch (error) {
     console.error("Error fetching kos by ID:", error);
@@ -48,23 +49,121 @@ export const updateKos = async (req, res) => {
   }
 };
 
-export const filterKos = async (req, res) => {
-  const { fasilitas, minHarga, maxHarga, rating, tipeHarga, harga } = req.query;
+// CREATE KOS (owner)
+export const createKos = async (req, res) => {
+  try {
+    const {
+      id_kos,
+      nama_kos,
+      alamat,
+      fasilitas,
+      harga_perbulan,
+      harga_pertahun,
+      kontak,
+      deskripsi,
+      tipe_kos
+    } = req.body;
+    // Validasi
+    if (!id_kos || !nama_kos || !alamat || !harga_perbulan || !harga_pertahun || !kontak || !req.files || !req.files.thumbnail) {
+      return res.status(400).json({ message: "Data tidak lengkap" });
+    }
+    // Upload thumbnail
+    const thumbResult = await uploadToCloudinary(req.files.thumbnail[0].buffer, "kos/thumbnail");
+    // Upload gallery
+    let galleryUrls = [];
+    if (req.files.gallery) {
+      for (const file of req.files.gallery) {
+        const gal = await uploadToCloudinary(file.buffer, "kos/gallery");
+        galleryUrls.push(gal.secure_url);
+      }
+    }
+    // Parse fasilitas jika string
+    let fasilitasArr = fasilitas;
+    if (typeof fasilitas === "string") {
+      try { fasilitasArr = JSON.parse(fasilitas); } catch { fasilitasArr = []; }
+    }
+    // Parse kontak jika string
+    let kontakObj = kontak;
+    if (typeof kontak === "string") {
+      try { kontakObj = JSON.parse(kontak); } catch { kontakObj = {}; }
+    }
+    // Buat data kos
+    const newKos = new Kos({
+      id_kos,
+      nama_kos,
+      alamat,
+      fasilitas: fasilitasArr,
+      harga_perbulan,
+      harga_pertahun,
+      kontak: kontakObj,
+      image: {
+        thumbnail: thumbResult.secure_url,
+        gallery: galleryUrls,
+      },
+      deskripsi: deskripsi || "",
+      status: "pending",
+      id_owner: req.user.id,
+      tipe_kos: tipe_kos || "campur",
+    });
+    await newKos.save();
+    res.status(201).json({ message: "Kos berhasil ditambahkan, menunggu approval admin", data: newKos });
+  } catch (error) {
+    console.error("Error create kos:", error);
+    res.status(500).json({ message: "Gagal menambah kos", error: error.message });
+  }
+};
 
+// GET KOS PENDING (admin)
+export const getPendingKos = async (req, res) => {
+  try {
+    const data = await Kos.find({ status: "pending" }).populate("id_owner", "username email");
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Gagal fetch kos pending", error: error.message });
+  }
+};
+
+// APPROVE/REJECT KOS (admin)
+export const approveKos = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, alasan } = req.body; // status: approved/rejected
+    if (!status || !["approved", "rejected"].includes(status)) {
+      return res.status(400).json({ message: "Status tidak valid" });
+    }
+    const kos = await Kos.findById(id).populate("id_owner");
+    if (!kos) return res.status(404).json({ message: "Kos tidak ditemukan" });
+    kos.status = status;
+    await kos.save();
+    // Notifikasi real-time (Socket.IO)
+    if (global.io && kos.id_owner) {
+      global.io.to(kos.id_owner._id.toString()).emit("kosApproval", {
+        kosId: kos._id,
+        status,
+        alasan: alasan || null,
+        nama_kos: kos.nama_kos,
+      });
+    }
+    res.json({ message: `Kos ${status === "approved" ? "disetujui" : "ditolak"}` });
+  } catch (error) {
+    res.status(500).json({ message: "Gagal approve/reject kos", error: error.message });
+  }
+};
+
+// FILTER/SEARCH KOS (hanya approved)
+export const filterKos = async (req, res) => {
+  const { fasilitas, minHarga, maxHarga, rating, tipeHarga, harga, lokasi, tipe } = req.query;
   try {
     const pipeline = [];
-
+    pipeline.push({ $match: { status: "approved" } });
     pipeline.push({
       $addFields: {
         avgBintang: { $round: [{ $avg: "$ulasan.bintang" }, 0] },
       },
     });
-
     let filterStage = { $match: {} };
-
     if (fasilitas) {
       const fasilitasArray = Array.isArray(fasilitas) ? fasilitas : [fasilitas];
-
       if (fasilitasArray.length > 0) {
         filterStage.$match.$and = fasilitasArray.map((facility) => ({
           fasilitas: {
@@ -75,17 +174,20 @@ export const filterKos = async (req, res) => {
         }));
       }
     }
-
-    const hargaField =
-      tipeHarga === "pertahun" ? "harga_pertahun" : "harga_perbulan";
-
+    // Filter lokasi
+    if (lokasi && lokasi.trim() !== "") {
+      filterStage.$match.alamat = { $regex: lokasi, $options: "i" };
+    }
+    // Filter tipe kos
+    if (tipe && tipe.trim() !== "") {
+      filterStage.$match.tipe_kos = tipe;
+    }
+    const hargaField = tipeHarga === "pertahun" ? "harga_pertahun" : "harga_perbulan";
     if (minHarga || maxHarga) {
       filterStage.$match[hargaField] = {};
-
       if (minHarga && minHarga.trim() !== "") {
         filterStage.$match[hargaField].$gte = parseInt(minHarga);
       }
-
       if (maxHarga && maxHarga.trim() !== "") {
         filterStage.$match[hargaField].$lte = parseInt(maxHarga);
       }
@@ -93,11 +195,9 @@ export const filterKos = async (req, res) => {
     if (rating && rating.trim() !== "") {
       filterStage.$match.avgBintang = parseInt(rating);
     }
-
     if (Object.keys(filterStage.$match).length > 0) {
       pipeline.push(filterStage);
     }
-
     if (harga === "termurah") {
       pipeline.push({ $sort: { [hargaField]: 1 } });
     } else if (harga === "termahal") {
@@ -105,19 +205,11 @@ export const filterKos = async (req, res) => {
     } else if (harga === "rating") {
       pipeline.push({ $sort: { avgBintang: -1 } });
     }
-
     pipeline.push({ $sort: { id_kos: 1 } });
-
     const data = await Kos.aggregate(pipeline);
-
-    console.log(`Found ${data.length} kos matching the criteria`);
-
     res.json(data);
   } catch (error) {
     console.error("Filtering error:", error);
-    res.status(500).json({
-      message: "Error filtering kos",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Error filtering kos", error: error.message });
   }
 };

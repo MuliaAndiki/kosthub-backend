@@ -16,6 +16,7 @@ export const register = async (req, res) => {
       tanggal_lahir,
       alamat,
       gender,
+      role,
     } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const realGender = gender === "Laki";
@@ -27,7 +28,8 @@ export const register = async (req, res) => {
       !fullname ||
       !nomor ||
       !tanggal_lahir ||
-      !alamat
+      !alamat ||
+      !role
     ) {
       return res.status(400).json({ message: "All fields are required" });
     }
@@ -36,6 +38,17 @@ export const register = async (req, res) => {
       return res
         .status(400)
         .json({ message: "Username or email already exists" });
+    }
+
+    let fotoProfilUrl = null;
+    if (req.file) {
+      try {
+        const { uploadToCloudinary } = await import("../utils/cloudinary.js");
+        const result = await uploadToCloudinary(req.file.buffer, "fotoProfil");
+        fotoProfilUrl = result.secure_url;
+      } catch (err) {
+        return res.status(500).json({ message: "Gagal upload foto profil", error: err.message });
+      }
     }
 
     const newUser = new Auth({
@@ -48,6 +61,8 @@ export const register = async (req, res) => {
       alamat: alamat || null,
       gender: realGender,
       token: null,
+      role,
+      fotoProfil: fotoProfilUrl,
     });
 
     await newUser.save();
@@ -73,7 +88,7 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     res.json({ token, user });
@@ -120,6 +135,17 @@ export const updateProfile = async (req, res) => {
         return res.status(400).json({ message: "Username already exists" });
       }
       user.username = username;
+    }
+
+    // Jika ada file foto profil baru, upload ke Cloudinary
+    if (req.file) {
+      try {
+        const { uploadToCloudinary } = await import("../utils/cloudinary.js");
+        const result = await uploadToCloudinary(req.file.buffer, "fotoProfil");
+        user.fotoProfil = result.secure_url;
+      } catch (err) {
+        return res.status(500).json({ message: "Gagal upload foto profil", error: err.message });
+      }
     }
 
     Object.keys(updates).forEach((key) => {

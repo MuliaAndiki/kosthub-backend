@@ -2,14 +2,13 @@ import express from "express";
 const authRouter = express.Router();
 import * as authController from "../controllers/authController.js";
 import multer from "multer";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
 import { verifyToken } from "../middleware/auth.js";
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 const uploadMemory = upload.single("fotoProfil");
 
-authRouter.post("/register", authController.register);
+authRouter.post("/register", uploadMemory, authController.register);
 authRouter.post("/login", authController.login);
 authRouter.put("/change-password", authController.changePassword);
 authRouter.put(

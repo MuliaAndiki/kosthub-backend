@@ -45,6 +45,16 @@ const AuthSchema = new mongoose.Schema({
       ref: "Kos",
     },
   ],
+  role: {
+    type: String,
+    enum: ["user", "owner", "admin"],
+    default: "user",
+    required: true,
+  },
+  reservaseKos: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Reservase",
+  },
 });
 
 export default mongoose.model("Auth", AuthSchema);

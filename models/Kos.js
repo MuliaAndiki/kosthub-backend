@@ -31,6 +31,23 @@ const KosSchema = new mongoose.Schema({
       imageUlasan: { type: String, required: true },
     },
   ],
+  status: {
+    type: String,
+    enum: ["pending", "approved", "rejected"],
+    default: "pending",
+    required: true,
+  },
+  id_owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Auth",
+    required: true,
+  },
+  tipe_kos: {
+    type: String,
+    enum: ["putra", "putri", "campur"],
+    default: "campur",
+    required: true,
+  },
 });
 
 export default mongoose.model("Kos", KosSchema);

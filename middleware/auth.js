@@ -23,6 +23,7 @@ export const verifyToken = async (req, res, next) => {
       id: user._id,
       username: user.username,
       email: user.email,
+      role: user.role,
     };
 
     next();
@@ -35,8 +36,16 @@ export const verifyToken = async (req, res, next) => {
 };
 
 export const requireRole = (roles) => (req, res, next) => {
+  console.log("DEBUG: requireRole - req.user:", req.user);
+  console.log("DEBUG: requireRole - Required roles:", roles);
+  console.log(
+    "DEBUG: requireRole - User role:",
+    req.user ? req.user.role : "No user object"
+  );
   if (!req.user || !roles.includes(req.user.role)) {
-    return res.status(403).json({ message: "Akses ditolak. Role tidak sesuai." });
+    return res
+      .status(403)
+      .json({ message: "Akses ditolak. Role tidak sesuai." });
   }
   next();
 };

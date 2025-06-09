@@ -47,7 +47,9 @@ export const register = async (req, res) => {
         const result = await uploadToCloudinary(req.file.buffer, "fotoProfil");
         fotoProfilUrl = result.secure_url;
       } catch (err) {
-        return res.status(500).json({ message: "Gagal upload foto profil", error: err.message });
+        return res
+          .status(500)
+          .json({ message: "Gagal upload foto profil", error: err.message });
       }
     }
 
@@ -88,9 +90,13 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
     res.json({ token, user });
   } catch (error) {
     res.status(500).json({ message: "Error logging in", error });
@@ -137,14 +143,15 @@ export const updateProfile = async (req, res) => {
       user.username = username;
     }
 
-    // Jika ada file foto profil baru, upload ke Cloudinary
     if (req.file) {
       try {
         const { uploadToCloudinary } = await import("../utils/cloudinary.js");
         const result = await uploadToCloudinary(req.file.buffer, "fotoProfil");
         user.fotoProfil = result.secure_url;
       } catch (err) {
-        return res.status(500).json({ message: "Gagal upload foto profil", error: err.message });
+        return res
+          .status(500)
+          .json({ message: "Gagal upload foto profil", error: err.message });
       }
     }
 

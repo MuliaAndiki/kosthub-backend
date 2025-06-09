@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import { INDONESIA_PROVINCES } from "../constants/provinces.js";
 const AuthSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -25,9 +25,12 @@ const AuthSchema = new mongoose.Schema({
   },
   tanggal_lahir: {
     type: String,
+    required: true,
   },
   alamat: {
     type: String,
+    enum: INDONESIA_PROVINCES,
+    required: true,
   },
   gender: {
     type: Boolean,

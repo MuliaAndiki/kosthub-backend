@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import * as kosController from "../controllers/kosController.js"; // Asumsi ekstensi .js
+import * as kosController from "../controllers/kosController.js";
 import { verifyToken, requireRole } from "../middleware/auth.js";
 import { uploadImages } from "../middleware/multer.js";
 

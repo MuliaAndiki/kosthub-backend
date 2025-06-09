@@ -154,7 +154,7 @@ export const getPendingKos = async (req, res) => {
 export const approveKos = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, alasan } = req.body; // status: approved/rejected
+    const { status, alasan } = req.body;
     if (!status || !["approved", "rejected"].includes(status)) {
       return res.status(400).json({ message: "Status tidak valid" });
     }

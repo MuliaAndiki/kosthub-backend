@@ -26,9 +26,6 @@ global.io = io;
 app.use(cors());
 app.use(express.json());
 
-app.use("/", (req, res) => {
-  res.send("Kosthub BackEnd Service");
-});
 app.use("/uploads", express.static("uploads"));
 app.use("/api/kos", kosRoutes);
 app.use("/api/auth", authRouter);

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { BankConstants } from "../constants/bank.js";
 
 const ReservaseSchema = new mongoose.Schema(
   {
@@ -9,14 +10,7 @@ const ReservaseSchema = new mongoose.Schema(
     email: { type: String },
     metode_pembayaran: {
       type: String,
-      enum: [
-        "Bank Syariah Indonesia",
-        "Bank Mandiri",
-        "Bank Negara Indonesia",
-        "Bank Tabungan Negara",
-        "Bank Central Asia",
-        "Bank Aceh Syariah",
-      ],
+      enum: BankConstants,
     },
     kontrak: { type: String },
     bukti_pembayaran: { type: String },

@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { verifyToken } from "../middleware/auth.js";
 import Kos from "../models/Kos.js";
-import Reservase from "../models/Reservase.js";
 
 export const register = async (req, res) => {
   try {
@@ -143,12 +142,18 @@ export const updateProfile = async (req, res) => {
       user.username = username;
     }
 
-    if (req.file) {
+    if (req.files && req.files.fotoProfil && req.files.fotoProfil.length > 0) {
       try {
         const { uploadToCloudinary } = await import("../utils/cloudinary.js");
-        const result = await uploadToCloudinary(req.file.buffer, "fotoProfil");
+
+        const fileToUpload = req.files.fotoProfil[0];
+        const result = await uploadToCloudinary(
+          fileToUpload.buffer,
+          "fotoProfil"
+        );
         user.fotoProfil = result.secure_url;
       } catch (err) {
+        console.error("Gagal mengunggah foto profil ke Cloudinary:", err);
         return res
           .status(500)
           .json({ message: "Gagal upload foto profil", error: err.message });

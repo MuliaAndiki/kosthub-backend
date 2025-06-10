@@ -1,0 +1,15 @@
+export const BankConstants = [
+  "Bank Syariah Indonesia",
+  "Bank Mandiri",
+  "Bank Negara Indonesia",
+  "Bank Tabungan Negara",
+  "Bank Central Asia",
+  "Bank Rakyat Indonesia",
+  "Bank Danamon",
+  "Bank CIMB Niaga",
+  "OCBC NISP",
+  "Bank Permata",
+  "PaninBank",
+  "Bank Maybank Indonesia",
+  "Bank Aceh Syariah",
+];

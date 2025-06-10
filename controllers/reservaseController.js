@@ -32,13 +32,11 @@ export const createReservase = async (req, res) => {
       return res.status(400).json({ message: "Mohon Isi Semua Field!" });
     }
 
-    // Cari user
     const existingUser = await Auth.findById(id_user);
     if (!existingUser) {
       return res.status(404).json({ message: "User tidak ditemukan" });
     }
 
-    // Cek apakah sudah reservasi sebelumnya
     if (existingUser.reservaseKos) {
       return res.status(400).json({
         message: "User sudah melakukan reservasi",
@@ -220,10 +218,19 @@ export const addReview = async (req, res) => {
     if (imageUlasanFile) {
       try {
         const { uploadToCloudinary } = await import("../utils/cloudinary.js");
-        const result = await uploadToCloudinary(imageUlasanFile.buffer, "ulasanKos");
+        const result = await uploadToCloudinary(
+          imageUlasanFile.buffer,
+          "ulasanKos"
+        );
         imageUlasanUrl = result.secure_url;
       } catch (err) {
-        return res.status(500).json({ success: false, message: "Gagal upload gambar ulasan", error: err.message });
+        return res
+          .status(500)
+          .json({
+            success: false,
+            message: "Gagal upload gambar ulasan",
+            error: err.message,
+          });
       }
     } else {
       return res.status(400).json({

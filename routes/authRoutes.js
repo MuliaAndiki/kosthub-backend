@@ -15,5 +15,6 @@ authRouter.put(
 );
 authRouter.post("/save-kos/:id_kos", verifyToken, authController.saveKos);
 authRouter.get("/getSaveKost", verifyToken, authController.getUser);
+authRouter.get("/getProfile/:id", verifyToken, authController.getProfile);
 
 export default authRouter;

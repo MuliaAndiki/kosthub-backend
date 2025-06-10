@@ -224,3 +224,27 @@ export const getUser = async (req, res) => {
       .json({ message: "Failed to fetch user", error: err.message });
   }
 };
+
+export const getProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await Auth.findById(id);
+    if (!user) {
+      return res
+        .status(400)
+        .json({ message: "User Profile Tidak Ditemukan", status: 400 });
+    }
+    res.status(200).json({
+      message: "User Profile Ditemukan",
+      status: 200,
+      data: user,
+    });
+  } catch (error) {
+    console.log("Erro fetching user:", error);
+    res.status(500).json({
+      message: "Server Internal Error",
+      status: 500,
+      error: error.message,
+    });
+  }
+};

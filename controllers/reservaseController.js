@@ -3,21 +3,14 @@ import Auth from "../models/Auth.js";
 import Kos from "../models/Kos.js";
 import path from "path";
 import mongoose from "mongoose";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 export const createReservase = async (req, res) => {
   const { id_kos, id_user } = req.params;
 
   try {
-    const {
-      nama,
-      tanggal_lahir,
-      nomor_hp,
-      gender,
-      email,
-      metode_pembayaran,
-      kontrak,
-      bukti_pembayaran,
-    } = req.body;
+    const { nama, tanggal_lahir, nomor_hp, gender, email, metode_pembayaran } =
+      req.body;
 
     if (
       !nama ||
@@ -26,8 +19,8 @@ export const createReservase = async (req, res) => {
       gender === undefined ||
       !email ||
       !metode_pembayaran ||
-      !kontrak ||
-      !bukti_pembayaran
+      !req.files?.kontrak ||
+      !req.files?.bukti_pembayaran
     ) {
       return res.status(400).json({ message: "Mohon Isi Semua Field!" });
     }
@@ -65,6 +58,26 @@ export const createReservase = async (req, res) => {
       });
     }
 
+    const uploadImages = {};
+
+    for (const key in req.files) {
+      uploadImages[key] = [];
+
+      for (const file of req.files[key]) {
+        const result = await uploadToCloudinary(
+          file.buffer,
+          `reservase/${key}`
+        );
+        uploadImages[key].push(result.secure_url);
+      }
+    }
+
+    const kontrakurl = uploadImages.kontrak ? uploadImages.kontrak[0] : null;
+
+    const buktiPembayaranurl = uploadImages.bukti_pembayaran
+      ? uploadImages.bukti_pembayaran[0]
+      : null;
+
     const realGender = gender === "Laki";
 
     const newReservase = new Reservase({
@@ -74,8 +87,8 @@ export const createReservase = async (req, res) => {
       gender: realGender,
       email,
       metode_pembayaran,
-      kontrak,
-      bukti_pembayaran,
+      kontrak: kontrakurl,
+      bukti_pembayaran: buktiPembayaranurl,
       id_kos: kos._id,
       id_user,
     });
@@ -213,31 +226,21 @@ export const addReview = async (req, res) => {
       });
     }
 
-    const imageUlasanFile = req.file;
-    let imageUlasanUrl = null;
-    if (imageUlasanFile) {
-      try {
-        const { uploadToCloudinary } = await import("../utils/cloudinary.js");
+    const uploadImages = {};
+
+    for (const key in req.files) {
+      uploadImages[key] = [];
+
+      for (const file of req.files[key]) {
         const result = await uploadToCloudinary(
-          imageUlasanFile.buffer,
-          "ulasanKos"
+          file.buffer,
+          `reservase/${key}`
         );
-        imageUlasanUrl = result.secure_url;
-      } catch (err) {
-        return res
-          .status(500)
-          .json({
-            success: false,
-            message: "Gagal upload gambar ulasan",
-            error: err.message,
-          });
+        uploadImages[key].push(result.secure_url);
       }
-    } else {
-      return res.status(400).json({
-        success: false,
-        message: "Gambar ulasan diperlukan.",
-      });
     }
+
+    const imageUlasanUrl = uploadImages.fotoReview;
 
     const ulasanBaru = {
       nama: user.fullname,

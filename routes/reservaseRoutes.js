@@ -2,16 +2,12 @@ import express from "express";
 const router = express.Router();
 import * as reservaseConroller from "../controllers/reservaseController.js";
 import { verifyToken } from "../middleware/auth.js";
-import multer from "multer";
-import { uploadToCloudinary } from "../utils/cloudinary.js";
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
-const uploadMemory = upload.single("imageUlasan");
+import { uploadImages } from "../middleware/multer.js";
 
 router.post(
   "/:id_user/:id_kos",
   verifyToken,
+  uploadImages,
   reservaseConroller.createReservase
 );
 
@@ -30,7 +26,7 @@ router.delete(
 router.post(
   "/review/:id_user/:id_reservase",
   verifyToken,
-  uploadMemory,
+  uploadImages,
   reservaseConroller.addReview
 );
 export default router;

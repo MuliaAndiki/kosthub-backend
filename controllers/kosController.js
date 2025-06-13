@@ -76,18 +76,21 @@ export const createKos = async (req, res) => {
       return res.status(400).json({ message: "Data tidak lengkap" });
     }
 
-    const thumbResult = await uploadToCloudinary(
-      req.files.thumbnail[0].buffer,
-      "kos/thumbnail"
-    );
+    const uploadImages = {};
 
-    let galleryUrls = [];
-    if (req.files.gallery) {
-      for (const file of req.files.gallery) {
-        const gal = await uploadToCloudinary(file.buffer, "kos/gallery");
-        galleryUrls.push(gal.secure_url);
+    for (const key in req.files) {
+      uploadImages[key] = [];
+
+      for (const file of req.files[key]) {
+        const result = await uploadToCloudinary(file.buffer, `kos/${key}`);
+        uploadImages[key].push(result.secure_url);
       }
     }
+
+    const thumbnailUrl = uploadImages.thumbnail
+      ? uploadImages.thumbnail[0]
+      : null;
+    const galleryUrls = uploadImages.gallery || [];
 
     let fasilitasArr = fasilitas;
     if (typeof fasilitas === "string") {
@@ -116,7 +119,7 @@ export const createKos = async (req, res) => {
       harga_pertahun,
       kontak: kontakObj,
       image: {
-        thumbnail: thumbResult.secure_url,
+        thumbnail: thumbnailUrl,
         gallery: galleryUrls,
       },
       deskripsi: deskripsi || "",

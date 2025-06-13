@@ -22,6 +22,9 @@ export const uploadImages = upload.fields([
   { name: "thumbnail", maxCount: 1 },
   { name: "gallery", maxCount: 4 },
   { name: "fotoProfil", maxCount: 1 },
+  { name: "fotoReview", maxCount: 2 },
+  { name: "kontrak", maxCount: 1 },
+  { name: "bukti_pembayaran", maxCount: 1 },
 ]);
 
 export default upload;

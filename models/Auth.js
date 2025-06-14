@@ -54,10 +54,6 @@ const AuthSchema = new mongoose.Schema({
     default: "user",
     required: true,
   },
-  reservaseKos: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Reservase",
-  },
 });
 
 export default mongoose.model("Auth", AuthSchema);

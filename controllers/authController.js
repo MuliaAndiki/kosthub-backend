@@ -267,6 +267,7 @@ export const googleLogin = async (req, res) => {
 
     if (!user) {
       user = new Auth({
+        _id: user._id,
         username: email.split("@")[0],
         email: email,
         password: "-",

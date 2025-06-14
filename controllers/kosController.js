@@ -124,7 +124,7 @@ export const createKos = async (req, res) => {
       },
       deskripsi: deskripsi || "",
       status: "pending",
-      id_owner: req.user.id,
+      id_owner: req.user._id,
       tipe_kos: tipe_kos || "campur",
     });
     await newKos.save();

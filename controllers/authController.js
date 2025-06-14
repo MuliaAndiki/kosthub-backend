@@ -291,7 +291,7 @@ export const googleLogin = async (req, res) => {
     res.status(200).json({
       token: Token,
       user: {
-        id: user._id,
+        _id: user._id,
         username: user.username,
         email: user.email,
         fullname: user.fullname,

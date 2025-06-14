@@ -1,4 +1,5 @@
 export const INDONESIA_PROVINCES = [
+  "-",
   "Aceh",
   "Bali",
   "Banten",

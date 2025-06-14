@@ -133,7 +133,7 @@ export const updateProfile = async (req, res) => {
   const { username, ...updates } = req.body;
 
   try {
-    const user = await Auth.findById(req.user.id);
+    const user = await Auth.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

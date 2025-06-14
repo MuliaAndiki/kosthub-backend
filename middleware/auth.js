@@ -13,6 +13,7 @@ export const verifyToken = async (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("decoded", decoded);
     const user = await Auth.findById(decoded.id);
     req.user = decoded;
     if (!user) {
@@ -20,7 +21,7 @@ export const verifyToken = async (req, res, next) => {
     }
 
     req.user = {
-      id: user._id,
+      _id: user._id,
       username: user.username,
       email: user.email,
       role: user.role,

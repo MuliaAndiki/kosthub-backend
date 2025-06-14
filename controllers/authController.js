@@ -109,7 +109,7 @@ export const changePassword = async (req, res) => {
   verifyToken(req, res, async () => {
     try {
       const { oldPassword, newPassword } = req.body;
-      const user = await Auth.findById(req.user.id);
+      const user = await Auth.findById(req.user._id);
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -133,7 +133,7 @@ export const updateProfile = async (req, res) => {
   const { username, ...updates } = req.body;
 
   try {
-    const user = await Auth.findById(req.user.id);
+    const user = await Auth.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -189,7 +189,7 @@ export const saveKos = async (req, res) => {
       return res.status(404).json({ message: "Kos not found" });
     }
 
-    const user = await Auth.findById(req.user.id).populate("savedKos");
+    const user = await Auth.findById(req.user._id).populate("savedKos");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -214,7 +214,7 @@ export const saveKos = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const user = await Auth.findById(req.user.id).populate("savedKos");
+    const user = await Auth.findById(req.user._id).populate("savedKos");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

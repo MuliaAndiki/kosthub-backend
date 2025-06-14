@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { verifyToken } from "../middleware/auth.js";
 import Kos from "../models/Kos.js";
+import { OAuth2Client } from "google-auth-library";
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const register = async (req, res) => {
   try {
@@ -241,6 +244,62 @@ export const getProfile = async (req, res) => {
     });
   } catch (error) {
     console.log("Erro fetching user:", error);
+    res.status(500).json({
+      message: "Server Internal Error",
+      status: 500,
+      error: error.message,
+    });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    const ticket = await client.verifyToken({
+      idToken: token,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getpayload();
+    const { email, name, picture } = payload;
+
+    let user = await Auth.findOne({ email });
+
+    if (!user) {
+      user = new Auth({
+        username: email.split("@")[0],
+        email: email,
+        password: "-",
+        fullname: name,
+        nomor: "-",
+        tanggal_lahir: "-",
+        alamat: "-",
+        gender: true,
+        fotoProfil: picture,
+        role: "user",
+      });
+      await user.save();
+    }
+
+    const Token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({
+      token: Token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        fullname: user.fullname,
+        fotoProfil: user.fotoProfil,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.log("Gagal Melakukan Login Menggunakan Goggle", error);
     res.status(500).json({
       message: "Server Internal Error",
       status: 500,

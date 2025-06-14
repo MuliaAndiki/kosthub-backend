@@ -256,11 +256,11 @@ export const googleLogin = async (req, res) => {
   const { token } = req.body;
 
   try {
-    const ticket = await client.verifyToken({
+    const ticket = await client.verifyIdToken({
       idToken: token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-    const payload = ticket.getpayload();
+    const payload = ticket.getPayload();
     const { email, name, picture } = payload;
 
     let user = await Auth.findOne({ email });

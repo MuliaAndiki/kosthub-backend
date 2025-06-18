@@ -1,7 +1,6 @@
 import Reservase from "../models/Reservase.js";
 import Auth from "../models/Auth.js";
 import Kos from "../models/Kos.js";
-import path from "path";
 import mongoose from "mongoose";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 
@@ -54,7 +53,7 @@ export const createReservase = async (req, res) => {
       ].includes(metode_pembayaran)
     ) {
       return res.status(400).json({
-        message: "Periode penyewaan harus 'Bulan' atau 'Tahun'",
+        message: "Metode pembayaran tidak valid",
       });
     }
 
@@ -89,6 +88,7 @@ export const createReservase = async (req, res) => {
       metode_pembayaran,
       kontrak: kontrakurl,
       bukti_pembayaran: buktiPembayaranurl,
+      status: "pending",
       id_kos: kos._id,
       id_user,
     });
@@ -113,6 +113,68 @@ export const createReservase = async (req, res) => {
   }
 };
 
+export const approveReservase = async (req, res) => {
+  try {
+    const { _id } = req.params;
+    const { status, alasan } = req.body;
+
+    if (!status || !["approved", "rejected"].includes(status)) {
+      return res.status(400).json({
+        message: "Status Tidak Valid",
+        status: 400,
+      });
+    }
+
+    const reservase = await Reservase.findById(_id).populate("id_user");
+    if (!reservase) {
+      return res.status(400).json({
+        message: "Reservase Tidak Di Temukan",
+        status: 400,
+      });
+    }
+    reservase.status = status;
+    await reservase.save();
+
+    if (global.io && reservase.id_user) {
+      global.io
+        .tp(reservase.id_user._id.toString())
+        .emit("Reservase Approval", {
+          reservaseId: reservase._id,
+          status,
+          alasan: alasan || null,
+        });
+    }
+    res.json({
+      message: `Reservase ${status === "approved" ? "disetujui" : "ditolak"}`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Gagal approve/reject Reservase",
+      error: error.message,
+    });
+  }
+};
+
+export const getPendingReservase = async (req, res) => {
+  try {
+    const datas = await Reservase.find({ status: "pending" }).populate(
+      "id_user",
+      "email"
+    );
+    res.status(200).json({
+      message: "Reservase Pending",
+      status: 200,
+      datas: datas,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Server Internal Error",
+      status: 500,
+      error: error.message,
+    });
+  }
+};
+
 export const getReservaseByUserId = async (req, res) => {
   try {
     const { id_user } = req.params;
@@ -125,9 +187,12 @@ export const getReservaseByUserId = async (req, res) => {
       });
     }
 
-    const reservaseList = await Reservase.find({ id_user: user._id }).populate(
-      "id_kos"
-    );
+    const reservaseList = await Reservase.find({
+      id_user: user._id,
+      status: "approved",
+    }).populate("id_kos");
+
+    console.log("List Approve", reservaseList);
 
     if (reservaseList.length === 0) {
       return res.status(404).json({

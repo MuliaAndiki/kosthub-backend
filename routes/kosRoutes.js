@@ -1,23 +1,23 @@
 import express from "express";
-const router = express.Router();
+const kosRouter = express.Router();
 import * as kosController from "../controllers/kosController.js";
 import { verifyToken, requireRole } from "../middleware/auth.js";
 import { uploadImages } from "../middleware/multer.js";
 
-router.get("/filter", kosController.filterKos);
-router.get("/", kosController.getAllKos);
+kosRouter.get("/filter", kosController.filterKos);
+kosRouter.get("/", kosController.getAllKos);
 
-router.get(
+kosRouter.get(
   "/pending",
   verifyToken,
   requireRole(["admin"]),
   kosController.getPendingKos
 );
 
-router.get("/:id", kosController.getKosById);
-router.put("/:id", kosController.updateKos);
+kosRouter.get("/:id", kosController.getKosById);
+kosRouter.put("/:id", kosController.updateKos);
 
-router.post(
+kosRouter.post(
   "/",
   verifyToken,
   requireRole(["owner"]),
@@ -25,11 +25,11 @@ router.post(
   kosController.createKos
 );
 
-router.patch(
+kosRouter.patch(
   "/:id/approve",
   verifyToken,
   requireRole(["admin"]),
   kosController.approveKos
 );
 
-export default router;
+export default kosRouter;

@@ -50,7 +50,7 @@ const AuthSchema = new mongoose.Schema({
   ],
   role: {
     type: String,
-    enum: ["user", "owner", "admin"],
+    enum: ["default", "user", "owner", "admin"],
     default: "user",
     required: true,
   },

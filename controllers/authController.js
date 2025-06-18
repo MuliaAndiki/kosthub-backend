@@ -267,7 +267,6 @@ export const googleLogin = async (req, res) => {
 
     if (!user) {
       user = new Auth({
-        _id: user._id,
         username: email.split("@")[0],
         email: email,
         password: "-",
@@ -277,7 +276,7 @@ export const googleLogin = async (req, res) => {
         alamat: "-",
         gender: true,
         fotoProfil: picture,
-        role: "user",
+        role: "default",
       });
       await user.save();
     }

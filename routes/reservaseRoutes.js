@@ -1,32 +1,47 @@
 import express from "express";
-const router = express.Router();
+const reservaseRouter = express.Router();
 import * as reservaseConroller from "../controllers/reservaseController.js";
-import { verifyToken } from "../middleware/auth.js";
+import { verifyToken, requireRole } from "../middleware/auth.js";
 import { uploadImages } from "../middleware/multer.js";
 
-router.post(
+reservaseRouter.post(
   "/:id_user/:id_kos",
   verifyToken,
   uploadImages,
   reservaseConroller.createReservase
 );
 
-router.get(
+reservaseRouter.get(
   "/user/:id_user",
   verifyToken,
   reservaseConroller.getReservaseByUserId
 );
 
-router.delete(
+reservaseRouter.delete(
   "/user/:id_user/:id_reservase",
   verifyToken,
   reservaseConroller.deleteReservaseByUserAndReservaseId
 );
 
-router.post(
+reservaseRouter.post(
   "/review/:id_user/:id_reservase",
   verifyToken,
   uploadImages,
   reservaseConroller.addReview
 );
-export default router;
+
+reservaseRouter.get(
+  "/pending",
+  verifyToken,
+  requireRole(["owner"]),
+  reservaseConroller.getPendingReservase
+);
+
+reservaseRouter.patch(
+  "/:idRes/approve",
+  verifyToken,
+  requireRole(["owner"]),
+  reservaseConroller.approveReservase
+);
+
+export default reservaseRouter;

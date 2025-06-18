@@ -19,6 +19,12 @@ const ReservaseSchema = new mongoose.Schema(
       ref: "Auth",
       require: true,
     },
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+      required: true,
+    },
     id_kos: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Kos",

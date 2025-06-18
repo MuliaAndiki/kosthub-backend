@@ -127,60 +127,94 @@ export const approveReservase = async (req, res) => {
       });
     }
 
-    if (!reservase.id_kos.id_owner.toString() !== ownerId.toString()) {
-      return res.status(400).json({
+    const reservase = await Reservase.findById(_id)
+      .populate({
+        path: "id_kos",
+        select: "id_owner",
+      })
+      .populate("id_user");
+
+    if (!reservase) {
+      return res.status(404).json({
+        message: "Reservase Tidak Ditemukan",
+        status: 404,
+      });
+    }
+
+    if (reservase.id_kos.id_owner.toString() !== ownerId.toString()) {
+      return res.status(403).json({
         message: "Anda tidak berhak meng-approve reservasi ini",
         status: 403,
       });
     }
 
-    const reservase = await Reservase.findById(_id).populate("id_user");
-    if (!reservase) {
-      return res.status(400).json({
-        message: "Reservase Tidak Di Temukan",
-        status: 400,
-      });
-    }
     reservase.status = status;
     await reservase.save();
 
     if (global.io && reservase.id_user) {
       global.io
-        .tp(reservase.id_user._id.toString())
+        .to(reservase.id_user._id.toString())
         .emit("Reservase Approval", {
           reservaseId: reservase._id,
           status,
           alasan: alasan || null,
         });
     }
+
     res.json({
-      message: `Reservase ${status === "approved" ? "disetujui" : "ditolak"}`,
+      message: `Reservase berhasil di${
+        status === "approved" ? "setujui" : "tolak"
+      }`,
+      status: 200,
     });
   } catch (error) {
     res.status(500).json({
       message: "Gagal approve/reject Reservase",
+      status: 500,
       error: error.message,
     });
   }
 };
 
-export const getPendingReservase = async (req, res) => {
+export const getReservaseStatus = async (req, res) => {
   try {
-    const ownerId = req.user._id;
+    const userId = req.user._id;
+    const userRole = req.user.role;
+    const { filter } = req.query;
 
-    const kosList = await Kos.find({ id_owner: ownerId });
-    const kosIds = kosList.map((kos) => kos._id);
-    const datas = await Reservase.find({
-      status: "pending",
-      id_kos: kosIds,
-    })
-      .populate("id_user", "email")
-      .populate("id_kos");
+    if (userRole === "owner") {
+      const kosList = await Kos.find({ id_owner: userId });
+      const kosIds = kosList.map((kos) => kos._id);
+      const datas = await Reservase.find({
+        status: "pending",
+        id_kos: kosIds,
+      })
+        .populate("id_user", "email")
+        .populate("id_kos");
 
-    res.status(200).json({
-      message: "Reservase Pending",
-      status: 200,
-      datas: datas,
+      res.status(200).json({
+        message: "Reservase Pending",
+        status: 200,
+        datas: datas,
+      });
+    }
+
+    if (userRole === "user") {
+      const query = { id_user: userId };
+      if (filter) {
+        query.status = filter;
+      }
+
+      const datas = await Reservase.find(query).populate("id_kos");
+      return res.status(200).json({
+        message: `Reservase Saya (${filter || "Semua"})`,
+        status: 200,
+        datas: datas,
+      });
+    }
+    return res.status(403).json({
+      message: "Role tidak dikenali",
+      status: 403,
     });
   } catch (error) {
     res.status(500).json({

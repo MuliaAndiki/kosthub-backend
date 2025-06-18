@@ -31,14 +31,14 @@ reservaseRouter.post(
 );
 
 reservaseRouter.get(
-  "/pending",
+  "/status",
   verifyToken,
-  requireRole(["owner"]),
-  reservaseConroller.getPendingReservase
+  requireRole(["owner", "user"]),
+  reservaseConroller.getReservaseStatus
 );
 
 reservaseRouter.patch(
-  "/:idRes/approve",
+  "/:_id/approve",
   verifyToken,
   requireRole(["owner"]),
   reservaseConroller.approveReservase

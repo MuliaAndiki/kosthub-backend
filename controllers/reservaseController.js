@@ -118,10 +118,19 @@ export const approveReservase = async (req, res) => {
     const { _id } = req.params;
     const { status, alasan } = req.body;
 
+    const ownerId = req.user._id;
+
     if (!status || !["approved", "rejected"].includes(status)) {
       return res.status(400).json({
         message: "Status Tidak Valid",
         status: 400,
+      });
+    }
+
+    if (!reservase.id_kos.id_owner.toString() !== ownerId.toString()) {
+      return res.status(400).json({
+        message: "Anda tidak berhak meng-approve reservasi ini",
+        status: 403,
       });
     }
 
@@ -157,10 +166,17 @@ export const approveReservase = async (req, res) => {
 
 export const getPendingReservase = async (req, res) => {
   try {
-    const datas = await Reservase.find({ status: "pending" }).populate(
-      "id_user",
-      "email"
-    );
+    const ownerId = req.user._id;
+
+    const kosList = await Kos.find({ id_owner: ownerId });
+    const kosIds = kosList.map((kos) => kos._id);
+    const datas = await Reservase.find({
+      status: "pending",
+      id_kos: kosIds,
+    })
+      .populate("id_user", "email")
+      .populate("id_kos");
+
     res.status(200).json({
       message: "Reservase Pending",
       status: 200,

@@ -1,8 +1,6 @@
 import Kos from "../models/Kos.js";
-import User from "../models/Auth.js";
-import Reservase from "../models/Reservase.js";
-import path from "path";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
+import { createSlug } from "../utils/slug.js";
 
 export const getAllKos = async (req, res) => {
   try {
@@ -16,15 +14,15 @@ export const getAllKos = async (req, res) => {
   }
 };
 
-export const getKosById = async (req, res) => {
+export const getKosBySlug = async (req, res) => {
   try {
     const kos = await Kos.findOne({
-      id_kos: req.params.id,
+      slug: req.params.slug,
       status: "approved",
     });
     kos ? res.json(kos) : res.status(404).json({ message: "Tidak ditemukan" });
   } catch (error) {
-    console.error("Error fetching kos by ID:", error);
+    console.error("Error fetching kos by Slug:", error);
     res
       .status(500)
       .json({ message: "Failed to fetch kos", error: error.message });
@@ -34,7 +32,7 @@ export const getKosById = async (req, res) => {
 export const updateKos = async (req, res) => {
   try {
     const updated = await Kos.findOneAndUpdate(
-      { id_kos: req.params.id },
+      { slug: req.params.slug },
       req.body,
       { new: true }
     );
@@ -52,7 +50,6 @@ export const updateKos = async (req, res) => {
 export const createKos = async (req, res) => {
   try {
     const {
-      id_kos,
       nama_kos,
       alamat,
       fasilitas,
@@ -64,7 +61,6 @@ export const createKos = async (req, res) => {
     } = req.body;
 
     if (
-      !id_kos ||
       !nama_kos ||
       !alamat ||
       !harga_perbulan ||
@@ -110,9 +106,17 @@ export const createKos = async (req, res) => {
       }
     }
 
+    let slug = createSlug(nama_kos);
+    let existingKos = await Kos.findOne({ slug });
+
+    while (existingKos) {
+      slug = createSlug(nama_kos);
+      existingKos = await Kos.findOne({ slug });
+    }
+
     const newKos = new Kos({
-      id_kos,
       nama_kos,
+      slug,
       alamat,
       fasilitas: fasilitasArr,
       harga_perbulan,
@@ -248,7 +252,7 @@ export const filterKos = async (req, res) => {
     } else if (harga === "rating") {
       pipeline.push({ $sort: { avgBintang: -1 } });
     }
-    pipeline.push({ $sort: { id_kos: 1 } });
+    pipeline.push({ $sort: { slug: 1 } });
     const data = await Kos.aggregate(pipeline);
     res.json(data);
   } catch (error) {

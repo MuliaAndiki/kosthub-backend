@@ -181,10 +181,10 @@ export const updateProfile = async (req, res) => {
 };
 
 export const saveKos = async (req, res) => {
-  const { id_kos } = req.params;
+  const { slug } = req.params;
 
   try {
-    const kos = await Kos.findOne({ id_kos });
+    const kos = await Kos.findOne({ slug });
     if (!kos) {
       return res.status(404).json({ message: "Kos not found" });
     }

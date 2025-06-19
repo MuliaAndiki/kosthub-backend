@@ -13,7 +13,7 @@ authRouter.put(
   uploadImages,
   authController.updateProfile
 );
-authRouter.post("/save-kos/:id_kos", verifyToken, authController.saveKos);
+authRouter.post("/save-kos/:slug", verifyToken, authController.saveKos);
 authRouter.get("/getSaveKost", verifyToken, authController.getUser);
 authRouter.get("/getProfile/:id", verifyToken, authController.getProfile);
 authRouter.post("/google", authController.googleLogin);

@@ -14,11 +14,11 @@ kosRouter.get(
   kosController.getPendingKos
 );
 
-kosRouter.get("/:id", kosController.getKosById);
-kosRouter.put("/:id", kosController.updateKos);
+kosRouter.get("/:slug", kosController.getKosBySlug);
+kosRouter.put("/:slug", kosController.updateKos);
 
 kosRouter.post(
-  "/",
+  "/create",
   verifyToken,
   requireRole(["owner"]),
   uploadImages,

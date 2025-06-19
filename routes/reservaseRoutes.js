@@ -5,7 +5,7 @@ import { verifyToken, requireRole } from "../middleware/auth.js";
 import { uploadImages } from "../middleware/multer.js";
 
 reservaseRouter.post(
-  "/:id_user/:id_kos",
+  "/:id_user/:slug",
   verifyToken,
   uploadImages,
   reservaseConroller.createReservase

@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 const KosSchema = new mongoose.Schema({
-  id_kos: { type: Number, required: true, unique: true },
   nama_kos: { type: String, required: true },
+  slug: { type: String, unique: true },
   alamat: { type: String, required: true },
   fasilitas: [
     {

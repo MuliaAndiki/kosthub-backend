@@ -5,7 +5,7 @@ import mongoose from "mongoose";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 export const createReservase = async (req, res) => {
-  const { id_kos, id_user } = req.params;
+  const { slug, id_user } = req.params;
 
   try {
     const { nama, tanggal_lahir, nomor_hp, gender, email, metode_pembayaran } =
@@ -37,7 +37,7 @@ export const createReservase = async (req, res) => {
       });
     }
 
-    const kos = await Kos.findOne({ id_kos: parseInt(id_kos) });
+    const kos = await Kos.findOne({ slug });
     if (!kos) {
       return res.status(404).json({ message: "Kos tidak ditemukan" });
     }

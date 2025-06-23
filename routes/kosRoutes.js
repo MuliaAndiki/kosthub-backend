@@ -10,7 +10,7 @@ kosRouter.get("/", kosController.getAllKos);
 kosRouter.get(
   "/pending",
   verifyToken,
-  requireRole(["admin"]),
+  requireRole(["admin", "owner"]),
   kosController.getPendingKos
 );
 

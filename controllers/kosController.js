@@ -146,10 +146,19 @@ export const createKos = async (req, res) => {
 
 export const getPendingKos = async (req, res) => {
   try {
-    const data = await Kos.find({ status: "pending" }).populate(
-      "id_owner",
-      "username email"
-    );
+    const userId = req.user._id;
+    const userRole = req.user.role;
+    const { filter } = req.query;
+
+    let query = { status: "pending" };
+    if (userRole === "owner") {
+      query.id_owner = userId;
+    }
+
+    if (filter) {
+      query.status = filter;
+    }
+    const data = await Kos.find(query).populate("id_owner", "username email");
     res.json(data);
   } catch (error) {
     res

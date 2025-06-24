@@ -150,7 +150,7 @@ export const getPendingKos = async (req, res) => {
     const userRole = req.user.role;
     const { filter } = req.query;
 
-    let query = { status: "pending" };
+    let query = { status: "pending", status: "approved" };
     if (userRole === "owner") {
       query.id_owner = userId;
     }

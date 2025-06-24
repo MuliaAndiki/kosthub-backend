@@ -150,7 +150,30 @@ export const getPendingKos = async (req, res) => {
     const userRole = req.user.role;
     const { filter } = req.query;
 
-    let query = { status: "pending", status: "approved" };
+    let query = { status: "pending" };
+    if (userRole === "owner") {
+      query.id_owner = userId;
+    }
+
+    if (filter) {
+      query.status = filter;
+    }
+    const data = await Kos.find(query).populate("id_owner", "username email");
+    res.json(data);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Gagal fetch kos pending", error: error.message });
+  }
+};
+
+export const getApprovegKos = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const userRole = req.user.role;
+    const { filter } = req.query;
+
+    let query = { status: "approved" };
     if (userRole === "owner") {
       query.id_owner = userId;
     }

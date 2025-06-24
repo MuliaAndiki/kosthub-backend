@@ -14,7 +14,13 @@ kosRouter.get(
   kosController.getPendingKos
 );
 
-kosRouter.get("/:slug", kosController.getKosBySlug);
+kosRouter.get(
+  "/approve",
+  verifyToken,
+  requireRole(["owner"]),
+  kosController.getApprovegKos
+),
+  kosRouter.get("/:slug", kosController.getKosBySlug);
 kosRouter.put("/:slug", kosController.updateKos);
 
 kosRouter.post(

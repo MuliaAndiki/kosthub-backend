@@ -192,7 +192,7 @@ export const getReservaseStatus = async (req, res) => {
         .populate("id_user", "email")
         .populate("id_kos");
 
-      res.status(200).json({
+      return res.status(200).json({
         message: "Reservase Pending",
         status: 200,
         datas: datas,
